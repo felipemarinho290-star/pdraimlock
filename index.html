@@ -9,22 +9,53 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: radial-gradient(circle, #0d0d0d, #000);
+    background: black;
     color: #00ffcc;
+    overflow: hidden;
+}
+
+/* Fundo animado */
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+/* Login */
+#login {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #111;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px #00ffcc;
     text-align: center;
 }
 
-h1 {
-    margin-top: 20px;
-    font-size: 28px;
-    text-shadow: 0 0 10px #00ffcc;
+input {
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
 }
 
-.container {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 30px;
+button {
+    padding: 10px 20px;
+    background: #00ffcc;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Painel */
+#painel {
+    display: none;
+    text-align: center;
+    padding-top: 20px;
 }
 
 .card {
@@ -32,36 +63,25 @@ h1 {
     border: 1px solid #00ffcc;
     border-radius: 15px;
     padding: 20px;
-    margin: 15px;
-    width: 260px;
+    margin: 15px auto;
+    width: 250px;
     box-shadow: 0 0 15px #00ffcc;
-    transition: 0.3s;
 }
 
-.card:hover {
-    transform: scale(1.05);
-}
-
+/* Toggle */
 .switch {
     position: relative;
     display: inline-block;
     width: 60px;
     height: 30px;
 }
-
-.switch input {
-    display: none;
-}
+.switch input {display:none;}
 
 .slider {
     position: absolute;
     background: #444;
     border-radius: 30px;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
 }
 
 .slider:before {
@@ -79,105 +99,116 @@ h1 {
 input:checked + .slider {
     background: #00ffcc;
 }
-
 input:checked + .slider:before {
     transform: translateX(30px);
-}
-
-button {
-    margin-top: 20px;
-    padding: 12px 25px;
-    background: #00ffcc;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-button:hover {
-    background: #00ccaa;
-}
-
-.footer {
-    margin-top: 40px;
-    font-size: 14px;
-    color: #888;
 }
 </style>
 </head>
 
 <body>
 
-<h1>⚡ pdraimlock ⚡</h1>
+<canvas id="bg"></canvas>
 
-<div class="container">
+<!-- LOGIN -->
+<div id="login">
+    <h2>🔐 pdraimlock</h2>
+    <input type="text" id="user" placeholder="Usuário"><br>
+    <input type="password" id="pass" placeholder="Senha"><br>
+    <button onclick="entrar()">Entrar</button>
+</div>
+
+<!-- PAINEL -->
+<div id="painel">
+    <h1>⚡ pdraimlock ⚡</h1>
 
     <div class="card">
-        <h2>🎯 Aim Assist</h2>
+        <h3>Aim Assist</h3>
         <label class="switch">
             <input type="checkbox" id="aim">
             <span class="slider"></span>
         </label>
-        <p>Status: <span id="aimStatus">OFF</span></p>
     </div>
 
     <div class="card">
-        <h2>🧱 Wall Vision</h2>
+        <h3>Wall Vision</h3>
         <label class="switch">
             <input type="checkbox" id="wall">
             <span class="slider"></span>
         </label>
-        <p>Status: <span id="wallStatus">OFF</span></p>
     </div>
 
     <div class="card">
-        <h2>⚡ Speed Boost</h2>
-        <input type="range" min="1" max="10" value="1" id="speed">
-        <p>Valor: <span id="speedValue">1</span></p>
+        <h3>Speed</h3>
+        <input type="range" min="1" max="10" id="speed">
     </div>
-
-</div>
-
-<button onclick="baixarConfig()">⬇️ Baixar Configuração</button>
-
-<div class="footer">
-    Desenvolvido por Pedro Henrique
 </div>
 
 <script>
+/* LOGIN */
+function entrar(){
+    let u = document.getElementById("user").value;
+    let p = document.getElementById("pass").value;
+
+    if(u === "pedro" && p === "123"){
+        document.getElementById("login").style.display = "none";
+        document.getElementById("painel").style.display = "block";
+    } else {
+        alert("Login errado");
+    }
+}
+
+/* SALVAR CONFIG */
 const aim = document.getElementById("aim");
 const wall = document.getElementById("wall");
 const speed = document.getElementById("speed");
 
-aim.addEventListener("change", () => {
-    document.getElementById("aimStatus").textContent = aim.checked ? "ON" : "OFF";
-});
-
-wall.addEventListener("change", () => {
-    document.getElementById("wallStatus").textContent = wall.checked ? "ON" : "OFF";
-});
-
-speed.addEventListener("input", () => {
-    document.getElementById("speedValue").textContent = speed.value;
-});
-
-function baixarConfig() {
-    const config = {
-        nome: "pdraimlock",
+function salvar(){
+    localStorage.setItem("config", JSON.stringify({
         aim: aim.checked,
         wall: wall.checked,
-        speed: speed.value,
-        data: new Date().toLocaleString()
-    };
-
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-
-    a.href = URL.createObjectURL(blob);
-    a.download = "config_pdraimlock.json";
-    a.click();
+        speed: speed.value
+    }));
 }
+
+aim.onchange = salvar;
+wall.onchange = salvar;
+speed.oninput = salvar;
+
+/* FUNDO ANIMADO */
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+for(let i=0;i<80;i++){
+    particles.push({
+        x: Math.random()*canvas.width,
+        y: Math.random()*canvas.height,
+        r: Math.random()*2,
+        dx: Math.random()-0.5,
+        dy: Math.random()-0.5
+    });
+}
+
+function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "#00ffcc";
+
+    particles.forEach(p=>{
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fill();
+
+        p.x += p.dx;
+        p.y += p.dy;
+    });
+
+    requestAnimationFrame(animate);
+}
+animate();
 </script>
 
 </body>
